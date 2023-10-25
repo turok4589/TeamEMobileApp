@@ -1,0 +1,12 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+, "app/videos.js", "app/register.js", "app/modal.js", "app/index.js", "app/dietPlan.js", "components/ExternalLink.js", "components/EditScreenInfo.js", "components/DietPlanCard.js", "components/VideoCard.js", "app/Messenger.js", "app/messageScreen.js"  ]
+}
