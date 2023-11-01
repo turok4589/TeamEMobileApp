@@ -7,7 +7,6 @@ import Onboarding from '../components/onboarding'
 import { ScrollView } from 'react-native';
 import axios from 'axios'
 import { router, useLocalSearchParams } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Registeration({ navigation }) {
   /*
@@ -61,26 +60,7 @@ const register=()=>{
   .then((res)=>{
     console.log(res.data)
     alert('signup successful')
-    axios.post('https://gymproject-404a72ac42b8.herokuapp.com/account/login/',{
-    "email":email,
-      "password":password
-    })
-    .then(async (resp)=>{
-      console.log(resp.data)
-      await AsyncStorage.setItem('access',resp.data?.tokens?.access)
-      await AsyncStorage.setItem('gym_membership',String(resp.data?.tokens?.gym_membership))
-      await AsyncStorage.setItem('refresh',resp.data?.tokens?.refresh)
-
-      router.replace({
-        pathname: "/payment", params: { amt: post === "Fitness"?"10":"20" }
-      });
-      
-    })
-    .catch((err)=>{
-      console.log(err?.response?.data)
-      const qwe= err?.response?.data;
-      alert(Object.keys(qwe)?.[0]+":"+Object.values(qwe)?.[0])
-    })
+    router.replace('/');
 
   })
   .catch((err)=>{
@@ -106,7 +86,7 @@ const register=()=>{
 {'<-Back'}              </Text>
             </TouchableOpacity>
 
-          <ScrollView showsVerticalScrollIndicator={false} style={{marginBottom:0}}>
+          <ScrollView showsVerticalScrollIndicator={false} style={{marginBottom:100}}>
 
           <Text style={styles.info}>Please enter below details to continue</Text>
 
@@ -172,7 +152,7 @@ const register=()=>{
       buttonDisabled={
         email.trim().length < 3 ||
         password.trim().length < 3 || 
-        mobile.trim().length!== 10 ||
+        mobile.trim().length< 10 ||
         password.length<3 ||
         password!==confirmpassword
       }

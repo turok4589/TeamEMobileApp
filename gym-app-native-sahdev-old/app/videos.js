@@ -77,7 +77,7 @@ const VideoScreen = ({ navigation }) => {
 <View style={{margin:5}}>
 <Text style={{fontSize: 25,marginVertical:20, marginLeft: 10}}>VIDEOS</Text>
     <ScrollView showsVerticalScrollIndicator={false}>
-      {data && data.length >0 && data.map( (res, ind) => <View key={ind} style={{marginVertical:20}}><VideoCard url={res.videos} images={res}/>
+      {data && data.length >0 && data.map( (res, ind) => <View key={ind} style={{marginVertical:20}}><VideoCard url={res.videos}/>
       </View>)}
     </ScrollView>
   </View>

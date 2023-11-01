@@ -25,10 +25,6 @@ export default function Home() {
         console.log(res.data)
         setProfile(res.data);
       })
-      .catch((err)=>{
-        console.log(err)
-        router.replace('/')
-      })
     })()
   },[])
   return (
@@ -53,6 +49,12 @@ export default function Home() {
       onPress={()=>{router.push('/products')}}
       >
       <Text style={styles.text}>PRODUCTS</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={{...styles.card, height: 60, marginHorizontal: 70}}
+      onPress={()=>{AsyncStorage.clear(); router.replace('/')}}
+      >
+      <Text style={{...styles.text, color: 'red'}}>Sign out</Text>
       </TouchableOpacity>
       <TouchableOpacity style={{alignSelf:'flex-end', marginTop: 30 ,justifyContent: 'center', alignItems: 'center',width: 50, height: 50, borderRadius: 50, backgroundColor: 'lightblue', marginRight: 20}} onPress={()=>router.push('/message')}>
         {/* <Text style={{fontWeight: "600"}}>

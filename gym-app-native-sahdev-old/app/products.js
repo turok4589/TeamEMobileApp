@@ -1,9 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { Button } from 'react-native-elements';
 
 const productData = [
   {
@@ -30,31 +29,31 @@ const productData = [
   // Add more product data here
 ];
 
-const ProductCard = ({ product, id, setData  }) => {
+const ProductCard = ({ product, selectedProducts, setSelectedProducts }) => {
+
   const handleBuyPress = async() => {
     // Add your buy logic here
-    const token = await AsyncStorage.getItem('access')
+//  setSelectedProducts([...selectedProducts, product])
+try {
+const token = await AsyncStorage.getItem('access')
 
-  axios.delete(`https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/order/${id}/`,{
-    headers: {
-      Authorization:
-        `Bearer ${token}`,
-    },
-  })
-  .then(async(res)=>{
-    const response = await axios.get('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/order/', {
+  await axios.post('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/order/', {
+  product: product.id,
+  delivery_address: "abc",
+  delivery_address_pincode: 474012
+}, {
   headers: {
     Authorization:
       `Bearer ${token}`,
   },
 })
-setData(response.data)
-console.log(res);
-alert(`Item removed`);
-  })
-  .catch((err)=>{
-    console.log(err)
-  })
+ console.log(selectedProducts)
+    alert(`${product.name} added to your cart`);
+} catch (error) {
+  console.log(error)
+}
+
+
   };
 
   return (
@@ -64,53 +63,42 @@ alert(`Item removed`);
       <Text style={styles.productPrice}>${product.price}</Text>
       <Text style={styles.productHeadline}>{product.headline}</Text>
       <TouchableOpacity onPress={handleBuyPress} style={styles.buyButton}>
-        <Text style={styles.buyButtonText}>Remove</Text>
+        <Text style={styles.buyButtonText}>Buy</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
 export default function App() {
-
-
-  const [data, setData] = useState([])
-  const [price, setPrice] = useState(0)
-
-  console.log(data)
+const [selectedProducts, setSelectedProducts] = useState([]);
+const [data, setData] = useState([]);
 
 useEffect(()=>{
-    const a = async()=>{
-      const token = await AsyncStorage.getItem('access')
+  const a = async()=>{
+    const token = await AsyncStorage.getItem('access')
 
-const response = await axios.get('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/order/', {
-  headers: {
-    Authorization:
-      `Bearer ${token}`,
-  },
+const response = await axios.get('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/product/', {
+headers: {
+  Authorization:
+    `Bearer ${token}`,
+},
 })
 setData(response.data);
-
-let sum = 0;
-response.data.map((val)=>{
-  sum+=val.product.price;
-})
-setPrice(sum);
-console.log(sum)
 }
 a()
-  },[])
+},[])
+
   return (
     <View style={{ flex: 1, backgroundColor: 'lightgray' }}>
-      <View style={styles.cardContainer}>
-      <Text style={styles.productName}>Cart Summary</Text>
-      <Text style={styles.productPrice}>Total Items: {data.length}</Text>
-      <Text style={styles.productPrice}>Total Price: ${data.length===0?0:price}</Text>
-  {data.length>0&&<Button title="Check Out" onPress={()=>{router.push('/payment')}} />}
-    </View>
+      <TouchableOpacity onPress={()=>router.push({
+        pathname: "/cart", params: { data: selectedProducts }
+      })}  style={{...styles.buyButton, backgroundColor:'grey', margin:10, width:100, alignSelf:'flex-end'}}>
+        <Text style={{...styles.buyButtonText, color:'white'}}>Go to your cart</Text>
+      </TouchableOpacity>
       <FlatList
         data={data}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <ProductCard product={item.product} id={item.id} setData={setData}/>}
+        renderItem={({ item }) => <ProductCard product={item} selectedProducts={selectedProducts} setSelectedProducts={setSelectedProducts} />}
       />
     </View>
   );
@@ -150,13 +138,14 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   buyButton: {
-    backgroundColor: 'red',
+    backgroundColor: 'yellow',
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
+    width:'100%'
   },
   buyButtonText: {
-    color: 'white',
+    // color: 'white',
     textAlign: 'center',
     fontWeight: 'bold',
   },

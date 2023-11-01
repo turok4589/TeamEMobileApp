@@ -2,7 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { Button } from 'react-native';
+import { TextInput } from 'react-native';
+import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 
 const productData = [
   {
@@ -29,7 +31,7 @@ const productData = [
   // Add more product data here
 ];
 
-const ProductCard = ({ product, selectedProducts, setSelectedProducts }) => {
+const ProductCard = ({ product, selectedProducts, setSelectedProducts, setModal }) => {
 
   const handleBuyPress = async() => {
     // Add your buy logic here
@@ -37,10 +39,18 @@ const ProductCard = ({ product, selectedProducts, setSelectedProducts }) => {
 try {
 const token = await AsyncStorage.getItem('access')
 
+const add = await AsyncStorage.getItem('address')
+const pin = await AsyncStorage.getItem('pincode')
+console.log(add , pin)
+
+if(!add || !pin) {
+  alert("Please enter address")
+  return
+}
   await axios.post('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/order/', {
   product: product.id,
-  delivery_address: "abc",
-  delivery_address_pincode: 474012
+  delivery_address: add,
+  delivery_address_pincode: pin
 }, {
   headers: {
     Authorization:
@@ -55,6 +65,7 @@ const token = await AsyncStorage.getItem('access')
 
 
   };
+  // const add = await AsyncStorage.getItem('add')
 
   return (
     <View style={styles.cardContainer}>
@@ -62,12 +73,73 @@ const token = await AsyncStorage.getItem('access')
       <Text style={styles.productName}>{product.name}</Text>
       <Text style={styles.productPrice}>${product.price}</Text>
       <Text style={styles.productHeadline}>{product.headline}</Text>
-      <TouchableOpacity onPress={handleBuyPress} style={styles.buyButton}>
+      <TouchableOpacity onPress={()=>{
+        handleBuyPress()}} style={styles.buyButton}>
         <Text style={styles.buyButtonText}>Buy</Text>
       </TouchableOpacity>
     </View>
   );
 };
+
+const AddressModal = ({ isVisible, onclose }) => {
+  const [address, setAddress] = useState('');
+  const [pincode, setPincode] = useState('');
+
+  const handleSave = async() => {
+    // You can perform any actions with the entered address and pincode here
+    // onSave({ address, pincode });
+
+    if(pincode.length<6) {
+      alert("Enter valid pincode")
+      return
+    }
+    await AsyncStorage.setItem('address',address)
+    await AsyncStorage.setItem('pincode',pincode)
+
+    onclose(false);
+
+  };
+
+  return (
+    <Modal
+      transparent={true}
+      animationType="slide"
+      visible={isVisible}
+      // onRequestClose={()=>onClose()}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Enter Address and Pincode</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Address"
+            onChangeText={setAddress}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Pincode"
+            onChangeText={(e)=>setPincode(e.length<=6?e:pincode)}
+            keyboardType="numeric"
+          />
+          <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+          <TouchableOpacity  onPress={handleSave}>
+            <Text style={{fontWeight: '600', color: 'purple'}}>
+            Save
+            </Text>
+            </TouchableOpacity>
+          <TouchableOpacity onPress={()=>onclose(false)} >
+          <Text style={{fontWeight: '600', color: 'grey'}}>
+            Close
+            </Text>
+          </TouchableOpacity>
+
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 
 export default function App() {
 const [selectedProducts, setSelectedProducts] = useState([]);
@@ -88,17 +160,28 @@ setData(response.data);
 a()
 },[])
 
+const [isVisible, setIsVisible] = useState(false)
+
   return (
     <View style={{ flex: 1, backgroundColor: 'lightgray' }}>
+      <View style={{ flexDirection: 'row'}}>
+
       <TouchableOpacity onPress={()=>router.push({
         pathname: "/cart", params: { data: selectedProducts }
       })}  style={{...styles.buyButton, backgroundColor:'grey', margin:10, width:100, alignSelf:'flex-end'}}>
         <Text style={{...styles.buyButtonText, color:'white'}}>Go to your cart</Text>
       </TouchableOpacity>
+      <TouchableOpacity onPress={()=>setIsVisible(true)}  style={{...styles.buyButton, backgroundColor:'grey', margin:10, width:100, alignSelf:'flex-end'}}>
+        <Text style={{...styles.buyButtonText, color:'white'}}>Enter Address</Text>
+      </TouchableOpacity>
+        </View>
+
+      <AddressModal isVisible={isVisible} onclose={setIsVisible}/>
+
       <FlatList
         data={data}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <ProductCard product={item} selectedProducts={selectedProducts} setSelectedProducts={setSelectedProducts} />}
+        renderItem={({ item }) => <ProductCard product={item} selectedProducts={selectedProducts} setSelectedProducts={setSelectedProducts} setModal={setIsVisible} />}
       />
     </View>
   );
@@ -149,4 +232,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    width: 300,
+    padding: 20,
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  }
 });

@@ -1,8 +1,8 @@
 import * as React from "react";
-import { View, StyleSheet, Button, ScrollView, Image } from "react-native";
+import { View, StyleSheet, Button } from "react-native";
 import { Video, ResizeMode } from "expo-av";
 
-export default function VideoCard({url, images={}}) {
+export default function VideoCard({url}) {
   console.log(url, 'urllllllllllllllllll')
   const video = React.useRef(null);
   const [status, setStatus] = React.useState({});
@@ -20,15 +20,6 @@ export default function VideoCard({url, images={}}) {
         isLooping
         onPlaybackStatusUpdate={(status) => setStatus(() => status)}
       />
-      {console.log(images)}
-      <ScrollView horizontal showsHorizontalScrollIndicator={true} style={{alignSelf: 'center'}}>
-        <Image source={{uri: images.images}} style={{width:100, height: 100, margin: 10}} width={100} height={100}/>
-        <Image source={{uri: images.images1}} width={100} height={100}style={{width:100, height: 100, margin: 10}}/>
-        <Image source={{uri: images.images2}} width={100} height={100}style={{width:100, height: 100, margin: 10}}/>
-        <Image source={{uri: images.images3}} width={100} height={100}style={{width:100, height: 100, margin: 10}}/>
-        <Image source={{uri: images.images4}} width={100} height={100}style={{width:100, height: 100, margin: 10}}/>
-
-      </ScrollView>
       {/* <View style={styles.buttons}>
         <Button
           title={status.isPlaying ? "Pause" : "Play"}

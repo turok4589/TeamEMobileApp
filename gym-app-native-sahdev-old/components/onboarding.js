@@ -34,14 +34,14 @@ const Onboarding = ({
     >
       <Text style={styles.header}>{title}</Text>
       {Component}
-      <View behavior={'position'} style={styles.buttonWrapper}>
+      <KeyboardAvoidingView behavior={'position'} style={styles.buttonWrapper}>
         <PrimaryButton
           buttonDisabled={buttonDisabled}
           isValidating={isValidating}
           buttonText={buttonText}
           handleKeyPress={handleKeyPress}
         />
-      </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };

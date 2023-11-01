@@ -1,19 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Image } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const PaymentGateway = () => {
-  const params = useLocalSearchParams();
-  const { amt } = params;
   const [payment, setPayment] = useState({
-    price: amt??'',
+    order: {},
+    price: 0,
     subscription: 'monthly',
-    card_no: '',
-    expiry_date: '',
-    cvv: ''
+    card_no: 0,
+    expiry_date: 0,
+    cvv: 0
   })
   const pay=async()=>{
     console.log(1111)
@@ -29,19 +28,8 @@ const PaymentGateway = () => {
     .then((res)=>{
       console.log(res.data)
       alert('Payment successful')
-      axios.delete('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/order/', {
-      headers: {
-        Authorization:
-          `Bearer ${token}`,
-      },
-    })
-    .then((res)=>{
-      router.replace('/home')
-    })
-    .catch((err)=>{
-      console.log(err)
-    })
-    
+      router.push('/home')
+  
     })
     .catch((err)=>{
       console.log(err)
@@ -54,36 +42,25 @@ const PaymentGateway = () => {
       <Text style={styles.header}>Payment Gateway</Text>
       <Image source={{uri:'https://profitbooks.net/wp-content/uploads/2020/01/razorpay-logo.png'}} style={{width: '100%', height: 100}} width={300} height={300}/>
       <Text style={styles.label}>Card Number</Text>
-      <TextInput style={styles.input} placeholder="0000 0000 0000" value={payment.card_no} onChangeText={(e)=>{
-        setPayment({
+      <TextInput style={styles.input} placeholder="0000 0000 0000" onChange={(e)=>setPayment({
         ...payment,
-        card_no: String(e).length<=12?e:payment.card_no
-         })}}
-         keyboardType="numeric"
-         />
+        card_no: e
+        })}/>
       <Text style={styles.label}>Expiry Date</Text>
-      <TextInput style={styles.input} placeholder="00/00/0000" value={payment.expiry_date} onChangeText={(e)=>setPayment({
+      <TextInput style={styles.input} placeholder="00/00/0000" onChange={(e)=>setPayment({
         ...payment,
-        expiry_date: String(e).length<=6 ?e:payment.expiry_date
-        })}
-        keyboardType="numeric"
-        />
+        expiry_date: e
+        })}/>
       <Text style={styles.label}>CVV</Text>
-      <TextInput style={styles.input} placeholder="000" value={payment.cvv} secureTextEntry={true} onChangeText={(e)=>setPayment({
+      <TextInput style={styles.input} placeholder="000" secureTextEntry={true} onChange={(e)=>setPayment({
         ...payment,
-        cvv: String(e).length<=3 ?e:payment.cvv
-        })}
-        keyboardType="numeric"
-        />
+        cvv: e
+        })}/>
       <Text style={styles.label}>Amount</Text>
-      <TextInput style={styles.input} placeholder="100" value={payment.price} onChangeText={(e)=>{
-        if(!amt)
-        setPayment({
+      <TextInput style={styles.input} placeholder="100" onChange={(e)=>setPayment({
         ...payment,
-        price: String(e).length<=8 ?e:payment.price
-        })}}
-        keyboardType="numeric"
-        />
+        price: e
+        })}/>
       <TouchableOpacity style={styles.buttonContainer} onPress={()=>pay()}>
         <Text style={{ color: '#fff' }}>Pay</Text>
       </TouchableOpacity>

@@ -1,9 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { Button } from 'react-native-elements';
 
 const productData = [
   {
@@ -30,31 +29,11 @@ const productData = [
   // Add more product data here
 ];
 
-const ProductCard = ({ product, id, setData  }) => {
-  const handleBuyPress = async() => {
+const ProductCard = ({ product }) => {
+  const handleBuyPress = () => {
     // Add your buy logic here
-    const token = await AsyncStorage.getItem('access')
-
-  axios.delete(`https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/order/${id}/`,{
-    headers: {
-      Authorization:
-        `Bearer ${token}`,
-    },
-  })
-  .then(async(res)=>{
-    const response = await axios.get('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/order/', {
-  headers: {
-    Authorization:
-      `Bearer ${token}`,
-  },
-})
-setData(response.data)
-console.log(res);
-alert(`Item removed`);
-  })
-  .catch((err)=>{
-    console.log(err)
-  })
+  // axios.delete('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/order/')
+    alert(`You bought ${product.name} for $${product.price}`);
   };
 
   return (
@@ -74,8 +53,6 @@ export default function App() {
 
 
   const [data, setData] = useState([])
-  const [price, setPrice] = useState(0)
-
   console.log(data)
 
 useEffect(()=>{
@@ -89,28 +66,15 @@ const response = await axios.get('https://gymproject-404a72ac42b8.herokuapp.com/
   },
 })
 setData(response.data);
-
-let sum = 0;
-response.data.map((val)=>{
-  sum+=val.product.price;
-})
-setPrice(sum);
-console.log(sum)
 }
 a()
   },[])
   return (
     <View style={{ flex: 1, backgroundColor: 'lightgray' }}>
-      <View style={styles.cardContainer}>
-      <Text style={styles.productName}>Cart Summary</Text>
-      <Text style={styles.productPrice}>Total Items: {data.length}</Text>
-      <Text style={styles.productPrice}>Total Price: ${data.length===0?0:price}</Text>
-  {data.length>0&&<Button title="Check Out" onPress={()=>{router.push('/payment')}} />}
-    </View>
       <FlatList
         data={data}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <ProductCard product={item.product} id={item.id} setData={setData}/>}
+        renderItem={({ item }) => <ProductCard product={item.product} />}
       />
     </View>
   );
