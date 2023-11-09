@@ -2,8 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { Button } from 'react-native-elements';
+import { Modal } from 'react-native-web';
 
 const productData = [
   {
@@ -29,6 +30,86 @@ const productData = [
   },
   // Add more product data here
 ];
+const AddressModal = ({ isVisible, onclose }) => {
+  const [address, setAddress] = useState('');
+  const [pincode, setPincode] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [country, setCountry] = useState('');
+
+  const handleSave = async() => {
+    // You can perform any actions with the entered address and pincode here
+    // onSave({ address, pincode });
+
+    if(pincode.length<6) {
+      alert("Enter valid pincode")
+      return
+    }
+    await AsyncStorage.setItem('address',address)
+    await AsyncStorage.setItem('pincode',pincode)
+    await AsyncStorage.setItem('city',city)
+    await AsyncStorage.setItem('state',state)
+    await AsyncStorage.setItem('country',country)
+
+    onclose(false);
+
+  };
+
+  return (
+    <Modal
+      transparent={true}
+      animationType="slide"
+      visible={isVisible}
+      // onRequestClose={()=>onClose()}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Enter Address and Pincode</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Address"
+            onChangeText={setAddress}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="City"
+            onChangeText={(e)=>setCity(e.length<=20?e:city)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="State"
+            onChangeText={(e)=>setState(e.length<=20?e:state)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Country"
+            onChangeText={(e)=>setCountry(e.length<=20?e:country)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Pincode"
+            onChangeText={(e)=>setPincode(e.length<=6?e:pincode)}
+            keyboardType="numeric"
+          />
+          <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+          <TouchableOpacity  onPress={handleSave}>
+            <Text style={{fontWeight: '600', color: 'purple'}}>
+            Save
+            </Text>
+            </TouchableOpacity>
+          <TouchableOpacity onPress={()=>onclose(false)} >
+          <Text style={{fontWeight: '600', color: 'grey'}}>
+            Close
+            </Text>
+          </TouchableOpacity>
+
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 
 const ProductCard = ({ product, id, setData  }) => {
   const handleBuyPress = async() => {
@@ -75,6 +156,7 @@ export default function App() {
 
   const [data, setData] = useState([])
   const [price, setPrice] = useState(0)
+  const [isVisible, setIsVisible] = useState(false)
 
   console.log(data)
 
@@ -98,15 +180,38 @@ setPrice(sum);
 console.log(sum)
 }
 a()
-  },[])
+  },[data])
+
+  const checkout = async() =>{
+    const add = await AsyncStorage.getItem('address')
+const pin = await AsyncStorage.getItem('pincode')
+const country = await AsyncStorage.getItem('country')
+const state = await AsyncStorage.getItem('state')
+const city = await AsyncStorage.getItem('city')
+
+    if(!add || !pin || !country || !state || !city) {
+      alert("Please enter address")
+      return
+    } else {
+      router.push({pathname: '/payment', params: { amt: price }})
+    }
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: 'lightgray' }}>
       <View style={styles.cardContainer}>
       <Text style={styles.productName}>Cart Summary</Text>
       <Text style={styles.productPrice}>Total Items: {data.length}</Text>
       <Text style={styles.productPrice}>Total Price: ${data.length===0?0:price}</Text>
-  {data.length>0&&<Button title="Check Out" onPress={()=>{router.push('/payment')}} />}
+  {data.length>0&&<Button title="Check Out" onPress={()=>{
+    checkout()
+      
+      }} />}
     </View>
+      <AddressModal isVisible={isVisible} onclose={setIsVisible}/>
+      <TouchableOpacity onPress={()=>setIsVisible(true)}  style={{...styles.buyButton, backgroundColor:'grey', margin:10, width:100}}>
+        <Text style={{...styles.buyButtonText, color:'white'}}>Enter Address</Text>
+      </TouchableOpacity>
       <FlatList
         data={data}
         keyExtractor={(item) => item.id.toString()}
@@ -160,4 +265,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    width: 300,
+    padding: 20,
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  }
 });

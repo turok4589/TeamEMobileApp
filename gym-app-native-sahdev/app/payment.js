@@ -18,8 +18,23 @@ const PaymentGateway = () => {
   const pay=async()=>{
     console.log(1111)
     const token = await AsyncStorage.getItem('access')
-    axios.post('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/payment/', {
-      ...payment
+    axios.get('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/order/', {
+      headers: {
+        Authorization:
+          `Bearer ${token}`,
+      },
+    })
+    .then(resp=>{
+      console.log(resp)
+      const order = [];
+      resp.data.map((val)=>{
+        order.push(val.id);
+      })
+
+
+      axios.post('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/payment/', {
+      ...payment,
+      order: String(order)
     },{
       headers: {
         Authorization:
@@ -47,6 +62,12 @@ const PaymentGateway = () => {
       console.log(err)
   
     })
+      console.log(order)
+    })
+    .catch((err)=>{
+      console.log(err)
+    })
+    
   }
   
   return (

@@ -41,16 +41,17 @@ const token = await AsyncStorage.getItem('access')
 
 const add = await AsyncStorage.getItem('address')
 const pin = await AsyncStorage.getItem('pincode')
+const country = await AsyncStorage.getItem('country')
+const state = await AsyncStorage.getItem('state')
+const city = await AsyncStorage.getItem('city')
+
 console.log(add , pin)
 
-if(!add || !pin) {
-  alert("Please enter address")
-  return
-}
+
+
   await axios.post('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/order/', {
   product: product.id,
-  delivery_address: add,
-  delivery_address_pincode: pin
+  quantity: "1",
 }, {
   headers: {
     Authorization:
@@ -81,65 +82,6 @@ if(!add || !pin) {
   );
 };
 
-const AddressModal = ({ isVisible, onclose }) => {
-  const [address, setAddress] = useState('');
-  const [pincode, setPincode] = useState('');
-
-  const handleSave = async() => {
-    // You can perform any actions with the entered address and pincode here
-    // onSave({ address, pincode });
-
-    if(pincode.length<6) {
-      alert("Enter valid pincode")
-      return
-    }
-    await AsyncStorage.setItem('address',address)
-    await AsyncStorage.setItem('pincode',pincode)
-
-    onclose(false);
-
-  };
-
-  return (
-    <Modal
-      transparent={true}
-      animationType="slide"
-      visible={isVisible}
-      // onRequestClose={()=>onClose()}
-    >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Enter Address and Pincode</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Address"
-            onChangeText={setAddress}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Pincode"
-            onChangeText={(e)=>setPincode(e.length<=6?e:pincode)}
-            keyboardType="numeric"
-          />
-          <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-          <TouchableOpacity  onPress={handleSave}>
-            <Text style={{fontWeight: '600', color: 'purple'}}>
-            Save
-            </Text>
-            </TouchableOpacity>
-          <TouchableOpacity onPress={()=>onclose(false)} >
-          <Text style={{fontWeight: '600', color: 'grey'}}>
-            Close
-            </Text>
-          </TouchableOpacity>
-
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
-
 
 export default function App() {
 const [selectedProducts, setSelectedProducts] = useState([]);
@@ -155,6 +97,10 @@ headers: {
     `Bearer ${token}`,
 },
 })
+.then((res)=>res)
+.catch((err)=>{
+  console.log(err)
+  })
 setData(response.data);
 }
 a()
@@ -171,12 +117,16 @@ const [isVisible, setIsVisible] = useState(false)
       })}  style={{...styles.buyButton, backgroundColor:'grey', margin:10, width:100, alignSelf:'flex-end'}}>
         <Text style={{...styles.buyButtonText, color:'white'}}>Go to your cart</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={()=>setIsVisible(true)}  style={{...styles.buyButton, backgroundColor:'grey', margin:10, width:100, alignSelf:'flex-end'}}>
-        <Text style={{...styles.buyButtonText, color:'white'}}>Enter Address</Text>
+
+      <TouchableOpacity onPress={()=>router.push({
+        pathname: "/orderHistory", params: { data: selectedProducts }
+      })}  style={{...styles.buyButton, backgroundColor:'grey', margin:10, width:100, alignSelf:'flex-end'}}>
+        <Text style={{...styles.buyButtonText, color:'white'}}>Order History</Text>
       </TouchableOpacity>
+
         </View>
 
-      <AddressModal isVisible={isVisible} onclose={setIsVisible}/>
+      {/* <AddressModal isVisible={isVisible} onclose={setIsVisible}/> */}
 
       <FlatList
         data={data}

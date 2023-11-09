@@ -46,9 +46,18 @@ export default function Login() {
   useEffect(() => {
     (async function(){
       const token = await AsyncStorage.getItem('access')
-      if(token) {
+      axios.get('https://gymproject-404a72ac42b8.herokuapp.com/account/profile/',{
+      headers: {
+        Authorization:
+          `Bearer ${token}`,
+      }})
+      .then((res)=>{
+        console.log(res.data)
         router.replace('/home')
-      }
+      })
+      .catch((err)=>{
+        console.log(err)
+      })
     })()
     
   }, [])

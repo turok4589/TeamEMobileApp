@@ -1,16 +1,18 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 
-const DietPlanCard = ({ plan }) => {
+const DietPlanCard = ({ plan={} }) => {
   return (
     <View style={styles.card}>
-      <Image source={{ uri: plan.morningPlanImage }} style={styles.image} />
       <Text style={styles.title}>{plan.body}</Text>
      <Text style={styles.subTitle}>Morning Plan:</Text>
+      <Image source={{ uri: plan.morningPlanImage }} style={styles.image} />
       <Text style={styles.text}> {plan.morningPlan}</Text>
      <Text style={styles.subTitle}>Afternoon Plan:</Text>
+     <Image source={{ uri: plan.afternoonPlanImage }} style={styles.image} />
       <Text style={styles.text}> {plan.afternoonPlan}</Text>
      <Text style={styles.subTitle}>Night Plan:</Text>
+     <Image source={{ uri: plan.nightPlanImage }} style={styles.image} />
       <Text style={styles.text}>{plan.nightPlan}</Text>
     </View>
   );

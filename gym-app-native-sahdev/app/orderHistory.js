@@ -2,7 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { Button } from 'react-native';
+import { TextInput } from 'react-native';
+import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 
 const productData = [
   {
@@ -29,32 +31,9 @@ const productData = [
   // Add more product data here
 ];
 
-const ProductCard = ({ product, selectedProducts, setSelectedProducts }) => {
+const ProductCard = ({ product }) => {
 
-  const handleBuyPress = async() => {
-    // Add your buy logic here
-//  setSelectedProducts([...selectedProducts, product])
-try {
-const token = await AsyncStorage.getItem('access')
-
-  await axios.post('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/order/', {
-  product: product.id,
-  delivery_address: "abc",
-  delivery_address_pincode: 474012
-}, {
-  headers: {
-    Authorization:
-      `Bearer ${token}`,
-  },
-})
- console.log(selectedProducts)
-    alert(`${product.name} added to your cart`);
-} catch (error) {
-  console.log(error)
-}
-
-
-  };
+  // const add = await AsyncStorage.getItem('add')
 
   return (
     <View style={styles.cardContainer}>
@@ -62,14 +41,11 @@ const token = await AsyncStorage.getItem('access')
       <Text style={styles.productName}>{product.name}</Text>
       <Text style={styles.productPrice}>${product.price}</Text>
       <Text style={styles.productHeadline}>{product.headline}</Text>
-      <TouchableOpacity onPress={handleBuyPress} style={styles.buyButton}>
-        <Text style={styles.buyButtonText}>Buy</Text>
-      </TouchableOpacity>
     </View>
   );
 };
 
-export default function App() {
+export default function Order() {
 const [selectedProducts, setSelectedProducts] = useState([]);
 const [data, setData] = useState([]);
 
@@ -77,29 +53,37 @@ useEffect(()=>{
   const a = async()=>{
     const token = await AsyncStorage.getItem('access')
 
-const response = await axios.get('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/product/', {
+const response = await axios.get('https://gymproject-404a72ac42b8.herokuapp.com/ecomerce/history/', {
 headers: {
   Authorization:
     `Bearer ${token}`,
 },
 })
-setData(response.data);
+.then((res)=>{
+  console.log(res,";;;;;;;")
+  const data = [];
+  setData(res.data)
+})
+.catch((err)=>{
+  console.log(err)
+  })
 }
 a()
 },[])
+console.log(data)
+const [isVisible, setIsVisible] = useState(false)
 
   return (
     <View style={{ flex: 1, backgroundColor: 'lightgray' }}>
-      <TouchableOpacity onPress={()=>router.push({
-        pathname: "/cart", params: { data: selectedProducts }
-      })}  style={{...styles.buyButton, backgroundColor:'grey', margin:10, width:100, alignSelf:'flex-end'}}>
-        <Text style={{...styles.buyButtonText, color:'white'}}>Go to your cart</Text>
-      </TouchableOpacity>
-      <FlatList
+      {data.length>0 ? <FlatList
         data={data}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <ProductCard product={item} selectedProducts={selectedProducts} setSelectedProducts={setSelectedProducts} />}
-      />
+        renderItem={({ item }) => <ProductCard product={item?.product} />}
+      />:<Text style={{alignSelf: 'center', fontSize: 24, fontWeight: '600'}}>
+
+        Order history is empty
+      </Text>
+        }
     </View>
   );
 }
@@ -149,4 +133,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    width: 300,
+    padding: 20,
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  }
 });

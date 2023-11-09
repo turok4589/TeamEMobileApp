@@ -4,6 +4,8 @@ import{ View, Text, StyleSheet } from 'react-native'
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Actions, Bubble, Composer, GiftedChat, InputToolbar } from "react-native-gifted-chat";
 import { Icon } from "react-native-elements";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
@@ -12,10 +14,59 @@ const ChatScreen = () => {
     // Load initial chat history or any other setup here
   }, []);
 
-  const handleSend = (newMessages) => {
+  const handleSend = async (newMessages) => {
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, newMessages)
     );
+
+      const token = await AsyncStorage.getItem('access')
+  
+      console.log(JSON.stringify(newMessages))
+  const response = await axios.get('https://gymproject-404a72ac42b8.herokuapp.com/chatbot/chat/', {
+  headers: {
+    Authorization:
+      `Bearer ${token}`,
+  },
+  })
+  .then((res)=>{
+
+    console.log(Math.random()*100000,";;;;;;;")
+    let ans=false
+    res.data.map((val)=>{
+      console.log(val.ques, newMessages[0]?.text)
+      if(val.ques === newMessages[0]?.text) {
+        console.log(111111111)
+        setMessages((previousMessages) =>
+      GiftedChat.append(previousMessages,[{
+        "text":val.ans,
+        "user":{"_id":1},
+        "_id":Math.random()*100000,
+        "createdAt":new Date()
+      }]
+      )
+      );
+      ans = true
+      }
+    })
+    if(ans === false) {
+      setMessages((previousMessages) =>
+      GiftedChat.append(previousMessages,[{
+        "text":'Please contact the admin',
+        "user":{"_id":1},
+        "_id":Math.random()*100000,
+        "createdAt":new Date()
+      }]
+      )
+      );
+
+    }
+  })
+  .catch((err)=>{
+    console.log(err)
+    })
+
+    console.log(response)
+
     // You can also send the message to your server here
   };
 
